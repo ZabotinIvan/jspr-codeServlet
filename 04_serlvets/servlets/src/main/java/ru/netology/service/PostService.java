@@ -18,15 +18,18 @@ public class PostService {
   }
 
   public Post getById(long id) {
-    return repository.getById(id).orElseThrow(NotFoundException::new);
+    return repository.getById(id).orElseThrow(() ->
+            new NotFoundException("Cannot show post :(\nThere is no post with ID " + id));
   }
 
   public Post save(Post post) {
-    return repository.save(post);
+    return repository.save(post).orElseThrow(() ->
+            new NotFoundException("Cannot save post :(\nThere is no post with ID " + post.getId()));
   }
 
   public void removeById(long id) {
-    repository.removeById(id);
+    repository.removeById(id).orElseThrow(() ->
+            new NotFoundException("Cannot remove post :(\nThere is no post with ID " + id));
   }
 }
 
