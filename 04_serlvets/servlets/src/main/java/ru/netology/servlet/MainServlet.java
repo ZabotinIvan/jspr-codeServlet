@@ -1,70 +1,22 @@
 package ru.netology.servlet;
-
-import lombok.SneakyThrows;
-import ru.netology.controller.PostController;
-import ru.netology.exception.NotFoundException;
-import ru.netology.repository.PostRepository;
-import ru.netology.service.PostService;
-
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-
 public class MainServlet extends HttpServlet {
-  private PostController controller;
+
+
   private final static String METHOD_GET = "GET";
   private final static String METHOD_POST = "POST";
   private final static String METHOD_DELETE = "DELETE";
 
-  @Override
-  public void init() {
-    PostRepository repository = new PostRepository();
-    PostService service = new PostService(repository);
-    controller = new PostController(service);
-  }
+  final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext("ru.netology");
 
-  @SneakyThrows
-  @Override
-  protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-    // если деплоились в root context, то достаточно этого
-    try {
-      String path = req.getRequestURI();
-      String method = req.getMethod();
-      // primitive routing
-      if (method.equals(METHOD_GET) && path.equals("/api/posts")) {
-        controller.all(resp);
-        return;
-      }
-      if (method.equals(METHOD_GET) && path.matches("/api/posts/\\d+")) {
-        // easy way
-        Long id = getId(path);
-        controller.getById(id, resp);
-        return;
-      }
-      if (method.equals(METHOD_POST) && path.equals("/api/posts")) {
-        controller.save(req.getReader(), resp);
-        return;
-      }
-      if (method.equals(METHOD_DELETE) && path.matches("/api/posts/\\d+")) {
-        // easy way
-        Long id = getId(path);
-        controller.removeById(id, resp);
-        return;
-      }
-      resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-    } catch (NotFoundException e) {
-      e.printStackTrace();
-      resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-      resp.getWriter().print(e.getMessage());
-    } catch (Exception e) {
-      e.printStackTrace();
-      resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    }
-  }
 
-  private Long getId(String path) {
-    return Long.parseLong(path.substring(path.lastIndexOf("/") + 1));
-  }
+  final AnnotationConfigApplicationContext controller = (AnnotationConfigApplicationContext) context.getBean("postController");
+
+    final AnnotationConfigApplicationContext service = context.getBean(AnnotationConfigApplicationContext.class);
+
+   final boolean isSame = service == context.getBean("postService");
+
+
 }
 
